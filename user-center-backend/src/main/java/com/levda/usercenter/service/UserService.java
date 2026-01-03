@@ -19,4 +19,13 @@ public interface UserService extends IService<User> {
      */
     long userRegister(String userAccount, String userPassword, String checkPassword);
 
+    /**
+     * User Login function
+     *
+     * @param userAccount  user account
+     * @param userPassword user password
+     * @param request
+     * @return De-identified user information脱敏后的用户信息
+     */
+    User userLogin(String userAccount, String userPassword, HttpServletRequest request);
 }

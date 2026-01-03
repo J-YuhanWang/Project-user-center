@@ -23,7 +23,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 @Service
-
+@Slf4j //Lombok注解，打上之后用于输出日志
 public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         implements UserService {
     @Resource
@@ -33,6 +33,12 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
      * Adding salt: obfuscating the password
      */
     private static final String SALT = "blair_user_center!@#";
+
+    /**
+     * User login state key
+     */
+    private static final String USER_LOGIN_STATE = "userLoginState";
+
 
     @Override
     public long userRegister(String userAccount, String userPassword, String checkPassword) {
@@ -93,4 +99,61 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         return user.getId();
     }
 
+
+    @Override
+    public User userLogin(String userAccount, String userPassword, HttpServletRequest request) {
+        //No.1 Register
+        //1. User verification
+        if(StringUtils.isAnyBlank(userAccount,userPassword)){
+            return null;
+        }
+        //2. userAccount length must be at least 4 characters.
+        if(userAccount.length() < 4){
+            return null;
+        }
+        //3.user password length must be at least 8 characters.
+        if(userPassword.length() < 8 ){
+            return null;
+        }
+
+        //5.账户不能包含特殊字符
+        // 5.1. 定义正则表达式（建议定义为常量）
+        String validPattern = "^[a-zA-Z0-9_]+$";
+        // 5.2. 使用 Pattern 和 Matcher 进行匹配
+        Matcher matcher = Pattern.compile(validPattern).matcher(userAccount);
+        // 5.3. 如果不匹配（包含特殊字符），直接返回错误码或抛出异常
+        if(!matcher.find()){
+            return null;
+        }
+
+        //No.2 加密功能 Password Salting & Hashing: md5不需要解密，是单向加密的非对称加密方式
+        String encryptPassword = DigestUtils.md5DigestAsHex((SALT+userPassword).getBytes());
+        QueryWrapper<User> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("userAccount",userAccount);
+        queryWrapper.eq("userPassword",encryptPassword);
+        User user = userMapper.selectOne(queryWrapper);
+        if(user == null){
+            //用户不存在/用户密码输错了,但是处于
+            log.info("User login failed, userAccount cannot match userPassword");
+            return null;
+        }
+
+        //No.3 用户信息脱敏
+        User safetyUser = new User();
+        safetyUser.setId(user.getId());
+        safetyUser.setUsername(user.getUsername());
+        safetyUser.setUserAccount(user.getUserAccount());
+        safetyUser.setAvatarUrl(user.getAvatarUrl());
+        safetyUser.setGender(user.getGender());
+
+        safetyUser.setPhone(user.getPhone());
+        safetyUser.setEmail(user.getEmail());
+        safetyUser.setUserStatus(user.getUserStatus());
+        safetyUser.setCreateTime(user.getCreateTime());
+
+        //No.4 记录用户的登录态
+        request.getSession().setAttribute(USER_LOGIN_STATE,safetyUser);
+
+        return safetyUser;
+    }
 }
