@@ -1,0 +1,43 @@
+package com.levda.usercenter.controller;
+/*
+ * User interface
+ * @author BlairWang
+ * @Date 02/01/2026 10:24 pm
+ * @Version 1.0
+ */
+
+import com.levda.usercenter.model.User;
+import com.levda.usercenter.model.request.UserRegisterRequest;
+import com.levda.usercenter.service.UserService;
+import jakarta.annotation.Resource;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+@RestController
+@RequestMapping("/user")
+public class UserController {
+
+    @Resource
+    private UserService userService;
+
+    @PostMapping("/register")
+    public Long userRegister(@RequestBody UserRegisterRequest userRegisterRequest){
+        if(userRegisterRequest == null){
+            return null;
+        }
+
+        String userAccount = userRegisterRequest.getUserAccount();
+        String userPassword = userRegisterRequest.getUserPassword();
+        String checkPassword = userRegisterRequest.getCheckPassword();
+        //Check if those three attributes exist--prune
+        if(StringUtils.isAnyBlank(userAccount,userPassword,checkPassword)){
+            return null;
+        }
+
+        return userService.userRegister(userAccount,userPassword,checkPassword);
+    }
+
+}
