@@ -1,0 +1,15 @@
+# IDE
+.idea/
+*.iml
+
+# Java
+target/
+mvnw
+mvnw.cmd
+.mvn/
+
+# Frontend
+node_modules/
+dist/
+build/
+.DS_Store
