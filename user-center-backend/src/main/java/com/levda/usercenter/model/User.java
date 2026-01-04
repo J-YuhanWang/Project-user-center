@@ -24,6 +24,8 @@ public class User implements Serializable {
     private String phone;
     private String email;
     private Integer userStatus;
+    private Integer userRole;//0-regular user, 1-administrator
+
     private Date createTime;
     private Date updateTime;
     @TableLogic

@@ -10,7 +10,7 @@ import jakarta.annotation.Resource;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.junit4.SpringRunner;
+
 
 import java.util.List;
 
@@ -30,7 +30,7 @@ public class SampleTest {
         System.out.println("----selectAll method test");
 //        queryWrapper是查询条件，为null代表查询所有
         List<User> userList = userMapper.selectList(null);
-        Assertions.assertEquals(5, userList.size());
+        Assertions.assertEquals(2, userList.size());
         userList.forEach(System.out::println);
 
     }

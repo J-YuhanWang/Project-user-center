@@ -1,0 +1,36 @@
+POST http://localhost:8080/user/login
+Content-Type: application/json
+
+{
+  "userAccount": "testnew111",
+  "userPassword": "test1234"
+}
+
+<> 2026-01-04T203403.200.json
+<> 2026-01-04T202517.200.json
+<> 2026-01-04T201716.200.json
+<> 2026-01-04T200543.200.json
+<> 2026-01-04T200407.200.json
+<> 2026-01-04T185156.200.json
+
+
+###
+GET http://localhost:8080/user/search
+
+<> 2026-01-04T203423.200.json
+
+
+
+###
+POST http://localhost:8080/user/delete
+Content-Type: application/json
+Cookie: JSESSIONID=BAE6A4CC4011D8FC1DC371E4FE5E154A
+
+2007129241959763970
+
+<> 2026-01-04T203435.200.json
+<> 2026-01-04T202830.200.json
+<> 2026-01-04T202604.415.json
+<> 2026-01-04T201807.400.json
+<> 2026-01-04T201007.400.json
+

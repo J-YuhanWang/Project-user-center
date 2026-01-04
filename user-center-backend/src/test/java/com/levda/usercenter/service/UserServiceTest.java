@@ -7,7 +7,6 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import static org.junit.jupiter.api.Assertions.*;
 
 /* User service test
  * @author BlairWang
@@ -41,7 +40,7 @@ public class UserServiceTest {
     }
 
     @Test
-    void userRegister() {
+    void testUserRegister() {
         String userAccount = "test";
         String userPassword = "";
         String checkPassword = "test1234";
@@ -75,6 +74,6 @@ public class UserServiceTest {
         res = userService.userRegister(userAccount, userPassword, checkPassword);
         Assertions.assertTrue(res>0);
 
-
     }
+
 }

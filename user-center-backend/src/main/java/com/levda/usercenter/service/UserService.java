@@ -28,4 +28,12 @@ public interface UserService extends IService<User> {
      * @return De-identified user information脱敏后的用户信息
      */
     User userLogin(String userAccount, String userPassword, HttpServletRequest request);
+
+    /**
+     * User desensitization
+     *
+     * @param originUser
+     * @return safety user after desensitization
+     */
+    User getSafetyUser(User originUser);
 }
