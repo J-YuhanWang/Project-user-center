@@ -11,6 +11,17 @@ export default defineConfig({
   },
   routes: [
     {
+      path: '/user',
+      layout:false,
+      routes:[
+        {
+          name:'Login',
+          path: '/user/login',
+          component:'./User/Login'
+        },
+      ],
+    },
+    {
       path: '/',
       redirect: '/home',
     },
@@ -30,6 +41,12 @@ export default defineConfig({
       component: './Table',
     },
   ],
+  proxy: {
+    '/api': {
+      target: 'http://localhost:8080',
+      changeOrigin: true,
+    },
+  },
   npmClient: 'yarn',
 });
 

@@ -65,4 +65,24 @@ declare namespace API {
   }
 
   type definitions_0 = null;
+
+  /**
+   * 登录请求参数（对应后端的 UserLoginRequest）
+   */
+  type LoginParams = {
+    userAccount?: string;
+    userPassword?: string;
+    autoLogin?:boolean;
+    type?:string;
+  }
+
+  /**
+   * 通用返回类（对应后端的 BaseResponse）
+   */
+  type BaseResponse<T> = {
+    code:number;
+    data: T;
+    message:string;
+    description:?string;
+  }
 }
