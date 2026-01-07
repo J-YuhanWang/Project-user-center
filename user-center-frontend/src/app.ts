@@ -2,11 +2,47 @@
 
 // 全局初始化数据配置，用于 Layout 用户信息和权限初始化
 import { RequestConfig } from '@@/plugin-request/request';
-
-
+import { history } from '@umijs/max';
+// import { message } from 'antd';
+import { currentUser as queryCurrentUser } from '@/services/demo/user-api';
 // 更多信息见文档：https://umijs.org/docs/api/runtime-config#getinitialstate
-export async function getInitialState(): Promise<{ name: string }> {
-  return { name: '@umijs/max' };
+// 1. 全局初始化状态
+export async function getInitialState(): Promise<{
+  settings?: any;
+  currentUser?: API.CurrentUser;
+  loading?: boolean;
+  fetchUserInfo?: () => Promise<API.CurrentUser | undefined>;
+}> {
+
+  // 定义一个获取用户信息的函数（Login 页面登录成功后会调用它）
+  const fetchUserInfo = async () => {
+    try {
+      // 这里的 queryCurrentUser 对应后端的 GET /user/current 接口
+      const msg = await queryCurrentUser();
+      return msg.data;
+    } catch (error) {
+      // 如果获取失败（比如没登录），跳转登录页
+      history.push('/user/login');
+    }
+    return undefined;
+  };
+
+  // 页面加载时执行的逻辑：
+  // 如果不是登录页面，就尝试去获取用户信息
+  if (window.location.pathname !== '/user/login') {
+    const currentUser = await fetchUserInfo();
+    return {
+      fetchUserInfo, // 把这个方法暴露给全局，这样 Login 页面就能用了
+      currentUser,
+      settings: {},
+    };
+  }
+
+  // 如果是登录页面，就不查用户信息了，只把方法暴露出去
+  return {
+    fetchUserInfo,
+    settings: {},
+  };
 }
 
 export const layout = () => {
@@ -21,7 +57,7 @@ export const layout = () => {
 export const request: RequestConfig = {
   // baseURL:'/api',
   timeout:10000,
-  // withCredentials: true, // 允许跨域携带 Cookie
+  withCredentials: true, // 允许跨域携带 Cookie
 
   // 响应拦截器 (保留之前建议的逻辑，这块很有用)
   // responseInterceptors: [

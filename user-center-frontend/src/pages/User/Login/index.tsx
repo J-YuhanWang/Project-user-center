@@ -9,40 +9,51 @@ import { login } from '@/services/demo/user-api';
 
 
 // 注意：这里以后要换成你真正的后端接口方法
-// import { login } from '@/services/ant-design-pro/api';
+// import { register } from '@/services/ant-design-pro/api';
 
-export default () => {
+const Login:React.FC = () =>{
   const [type, setType] = useState<string>('account');
+  const { initialState, setInitialState} = useModel('@@initialState');
 
-// 2. 获取全局状态控制权（用来替代 fetchUserInfo）
-  const { setInitialState } = useModel('@@initialState');
+  const fetchUserInfo = async()=>{
+    const userInfo = await initialState?.fetchUserInfo?.();
+
+    if(userInfo){
+      await setInitialState((s)=>({
+        ...s,
+        currentUser:userInfo,
+      }));
+    }
+  };
 
   // 表单提交处理函数
   const handleSubmit = async (values: API.LoginParams) => {
     try {
-      //login
-      // 1. 打印看看用户输入了什么，方便调试
-      console.log('用户提交的数据:', values);
-
-      // TODO: 这里将来要写连接后端的代码，类似：
+      // 登录
       const user = await login({ ...values, type });
-      if(user){
-        const defaultLoginSuccessMessage = '登录成功！(模拟)';
-        message.success(defaultLoginSuccessMessage);
-        await setInitialState((s)=>({
-          ...s,
-          currentUser:user,
-        }));
 
-        //跳转逻辑
+      if (user) {
+        const defaultLoginSuccessMessage = '登录成功！';
+        message.success(defaultLoginSuccessMessage);
+
+        // 关键点：鱼皮是先 fetchUserInfo 再跳转
+        // 如果你 app.tsx 还没写好 fetchUserInfo，这里可能会没反应
+        // 为了防坑，我们加个保险：如果 fetch 没拿回来，就手动存一下
+        try {
+          await fetchUserInfo();
+        } catch (error) {
+          // 兜底逻辑：如果 app.tsx 没配置好，至少把当前的 user 存进去
+          // 加上 'as any' 强行忽略类型检查，保证能跑通
+          setInitialState((s) => ({ ...s, currentUser: user as any }));
+        }
+
         const urlParams = new URL(window.location.href).searchParams;
         const redirect = urlParams.get('redirect');
         history.push(redirect || '/');
-
         return;
       }
 
-      // 如果 user 是 null（登录失败）
+      // 如果 user 是 null
       message.error('登录失败，请检查账号和密码');
     } catch (error) {
       const defaultLoginFailureMessage = '登录失败，请重试！';
@@ -132,3 +143,5 @@ export default () => {
     </div>
   );
 };
+
+export default Login;

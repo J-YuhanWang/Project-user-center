@@ -11,3 +11,12 @@ export async function login(body: API.LoginParams, options?: { [key: string]: an
     ...(options || {}),
   });
 }
+
+/** 获取当前用户 GET /api/user/current */
+export async function currentUser(options?: { [key: string]: any }) {
+  // 注意：这里 URL 写 '/user/current'，request 会自动拼上 /api
+  return request<API.BaseResponse<API.CurrentUser>>('/user/current', {
+    method: 'GET',
+    ...(options || {}),
+  });
+}

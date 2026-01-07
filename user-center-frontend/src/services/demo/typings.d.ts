@@ -85,4 +85,23 @@ declare namespace API {
     message:string;
     description:?string;
   }
+  // 当前用户类型 (对应后端的 User 类)
+  type CurrentUser = {
+    id?: number;
+    username?: string;
+    userAccount?: string;
+    avatarUrl?: string;
+    gender?: number;
+    phone?: string;
+    email?: string;
+    userStatus?: number;
+    createTime?: string;
+    userRole?: number;
+  };
+  // 登录返回结果
+  type LoginResult = {
+    status?: string;
+    type?: string;
+    currentAuthority?: string;
+  };
 }
