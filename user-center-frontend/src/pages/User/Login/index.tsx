@@ -5,6 +5,7 @@ import { message, Tabs } from 'antd';
 import React, { useState } from 'react';
 import { PLANET_LINK, SYSTEM_LOGO } from '@/constants';
 import { login } from '@/services/demo/user-api';
+import { currentUser as queryCurrentUser } from '@/services/demo/user-api';
 
 
 // 注意：这里以后要换成你真正的后端接口方法
@@ -14,44 +15,48 @@ const Login:React.FC = () =>{
   const [type, setType] = useState<string>('account');
   const { initialState, setInitialState} = useModel('@@initialState');
 
-  const fetchUserInfo = async()=>{
-    const userInfo = await initialState?.fetchUserInfo?.();
-
-    if(userInfo){
-      await setInitialState((s)=>({
-        ...s,
-        currentUser:userInfo,
-      }));
-    }
-  };
-
   // 表单提交处理函数
   const handleSubmit = async (values: API.LoginParams) => {
     try {
-      // 登录
+      // 1.登录
       const user = await login({ ...values, type });
 
       if (user) {
         const defaultLoginSuccessMessage = '登录成功！';
         message.success(defaultLoginSuccessMessage);
+        // 2. 获取真正的用户信息
+        // 不要直接使用 login 返回的 user，因为它可能包含 code, message 等包裹信息
+        // 我们调用 app.tsx 里暴露出来的 fetchUserInfo 方法，确保获取的数据格式是统一的
 
-        // 关键点：鱼皮是先 fetchUserInfo 再跳转
-        // 如果你 app.tsx 还没写好 fetchUserInfo，这里可能会没反应
-        // 为了防坑，我们加个保险：如果 fetch 没拿回来，就手动存一下
+        await new Promise((resolve) => setTimeout(resolve, 100));
+
+
+        // 🌟 核心步骤 2: 亲自去查户口 (不依赖 app.tsx)
+        let userInfo;
         try {
-          await fetchUserInfo();
+          // 直接调接口，拿到最原始的数据
+          userInfo = await queryCurrentUser();
         } catch (error) {
-          // 兜底逻辑：如果 app.tsx 没配置好，至少把当前的 user 存进去
-          // 加上 'as any' 强行忽略类型检查，保证能跑通
-          setInitialState((s) => ({ ...s, currentUser: user as any }));
+          console.error('获取详细信息失败，可能是 Cookie 没跟上', error);
         }
 
+        // 🌟 核心步骤 3: 只有查到了才更新状态并跳转
+        if (userInfo) {
+          // 打印一下，让自己放心
+          console.log('准备写入全局状态的用户信息:', userInfo);
+
+          await setInitialState((s) => ({
+            ...s,
+            currentUser: userInfo,
+          }));
+        }
+
+        // 3. 状态更新完毕，跳转
         const urlParams = new URL(window.location.href).searchParams;
         const redirect = urlParams.get('redirect');
         history.push(redirect || '/');
         return;
       }
-
       // 如果 user 是 null
       message.error('登录失败，请检查账号和密码');
     } catch (error) {

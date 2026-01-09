@@ -26,7 +26,8 @@ export async function register(body: API.RegisterParams, options?: { [key: strin
 /** 获取当前用户 GET /api/user/current */
 export async function currentUser(options?: { [key: string]: any }) {
   // 注意：这里 URL 写 '/user/current'，request 会自动拼上 /api
-  return request<API.BaseResponse<API.CurrentUser>>('/user/current', {
+  // return request<{data: API.CurrentUser}>('/api/user/current',{ //此时返回的是一个包含data,data为user的对象
+  return request<API.CurrentUser>('/api/user/current',{ //此时返回的是user
     method: 'GET',
     ...(options || {}),
   });

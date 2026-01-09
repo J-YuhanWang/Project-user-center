@@ -105,8 +105,9 @@ declare namespace API {
     phone?: string;
     email?: string;
     userStatus?: number;
-    createTime?: string;
+    createTime?: Date;
     userRole?: number;
+
   };
   // 登录返回结果
   type LoginResult = {
