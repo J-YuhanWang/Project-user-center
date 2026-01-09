@@ -3,8 +3,11 @@
 // 全局初始化数据配置，用于 Layout 用户信息和权限初始化
 import { RequestConfig } from '@@/plugin-request/request';
 import { history } from '@umijs/max';
-// import { message } from 'antd';
 import { currentUser as queryCurrentUser } from '@/services/demo/user-api';
+import { RunTimeLayoutConfig } from '@umijs/max';
+
+const loginPath = '/user/login';
+
 // 更多信息见文档：https://umijs.org/docs/api/runtime-config#getinitialstate
 // 1. 全局初始化状态
 export async function getInitialState(): Promise<{
@@ -22,14 +25,14 @@ export async function getInitialState(): Promise<{
       return msg.data;
     } catch (error) {
       // 如果获取失败（比如没登录），跳转登录页
-      history.push('/user/login');
+      // history.push('/user/login');
     }
     return undefined;
   };
 
   // 页面加载时执行的逻辑：
   // 如果不是登录页面，就尝试去获取用户信息
-  if (window.location.pathname !== '/user/login') {
+  if (window.location.pathname !== loginPath) {
     const currentUser = await fetchUserInfo();
     return {
       fetchUserInfo, // 把这个方法暴露给全局，这样 Login 页面就能用了
@@ -44,13 +47,27 @@ export async function getInitialState(): Promise<{
     settings: {},
   };
 }
-
-export const layout = () => {
+export const layout: RunTimeLayoutConfig = ({ initialState }) => {
   return {
     logo: 'https://img.alicdn.com/tfs/TB1YHEpwUT1gK0jSZFhXXaAtVXa-28-27.svg',
     menu: {
       locale: false,
     },
+    layout: 'mix',
+
+  //   Interception logic during page switching
+    onPageChange:()=>{
+      const {location} = history;
+      const whiteList = ['/user/register',loginPath];
+      if(whiteList.includes(location.pathname)){
+        return;
+      }
+      //如果没有登陆，重定向到login page
+      if(!initialState?.currentUser){
+        history.push(loginPath);
+      }
+
+    }
   };
 };
 

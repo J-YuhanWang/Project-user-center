@@ -77,6 +77,16 @@ declare namespace API {
   }
 
   /**
+   * 注册请求参数（对应后端的 UserLoginRequest）
+   */
+  type RegisterParams = {
+    userAccount?: string;
+    userPassword?: string;
+    checkPassword?: string;
+    type?:string;
+  }
+
+  /**
    * 通用返回类（对应后端的 BaseResponse）
    */
   type BaseResponse<T> = {
@@ -104,4 +114,7 @@ declare namespace API {
     type?: string;
     currentAuthority?: string;
   };
+
+  // 注册返回结果：用户id long--number
+  type RegisterResult = number;
 }

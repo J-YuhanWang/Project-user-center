@@ -12,8 +12,9 @@ public interface UserService extends IService<User> {
 
     /**
      * User Register function
-     * @param userAccount user account
-     * @param userPassword user password
+     *
+     * @param userAccount   user account
+     * @param userPassword  user password
      * @param checkPassword user password double check
      * @return new user id
      */

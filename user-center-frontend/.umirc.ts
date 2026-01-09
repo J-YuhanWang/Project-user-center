@@ -12,12 +12,17 @@ export default defineConfig({
   routes: [
     {
       path: '/user',
-      layout:false,
-      routes:[
+      layout: false,
+      routes: [
         {
-          name:'Login',
+          name: 'Login',
           path: '/user/login',
-          component:'./User/Login'
+          component: './User/Login',
+        },
+        {
+          name: 'Register',
+          path: '/user/register',
+          component: './User/Register',
         },
       ],
     },
