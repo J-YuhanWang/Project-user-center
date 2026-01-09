@@ -1,10 +1,9 @@
 import { LockOutlined, UserOutlined } from '@ant-design/icons';
-import { LoginForm, ProFormCheckbox, ProFormText } from '@ant-design/pro-components';
-import { useModel, history, Link } from '@umijs/max';
-import { Divider, message, Space, Tabs } from 'antd';
+import { LoginForm, ProFormText } from '@ant-design/pro-components';
+import { history, Link, useModel } from '@umijs/max';
+import { message, Tabs } from 'antd';
 import React, { useState } from 'react';
-import { SYSTEM_LOGO } from '@/constants';
-import { PLANET_LINK } from '@/constants'
+import { PLANET_LINK, SYSTEM_LOGO } from '@/constants';
 import { login } from '@/services/demo/user-api';
 
 
