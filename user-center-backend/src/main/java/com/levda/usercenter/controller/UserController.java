@@ -59,6 +59,22 @@ public class UserController {
         return userService.userLogin(userAccount,userPassword,request);
     }
 
+    @GetMapping("/current")
+    public User getCurrentUser(HttpServletRequest request){
+        Object userObj = request.getSession().getAttribute(USER_LOGIN_STATE);
+        User currentUser =(User) userObj;
+        if(currentUser==null){
+            return null;
+        }
+        //找到当前的currentUser的id
+        long userId = currentUser.getId();
+        //通过id获取user
+        User user = userService.getById(userId);
+        //TODO:判断用户是否合法：是否被封号、删除等，做出相应处理
+        //用户脱敏
+        return userService.getSafetyUser(user);
+    }
+
     @GetMapping("/search")
     public List<User> searchUser(String username,HttpServletRequest request){
         // Authentication: Only the administrator could query
