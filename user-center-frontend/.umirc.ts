@@ -31,19 +31,27 @@ export default defineConfig({
       redirect: '/home',
     },
     {
-      name: '首页',
+      name: 'Home',
       path: '/home',
       component: './Home',
+    },
+    {
+      path: '/admin',
+      name:'Administration',
+      icon:'crown',
+      access:'canAdmin',
+      routes: [
+        {
+          name: 'User manage',
+          path: '/admin/user-manage',
+          component: './Admin/UserManage',
+        },
+      ],
     },
     {
       name: '权限演示',
       path: '/access',
       component: './Access',
-    },
-    {
-      name: ' CRUD 示例',
-      path: '/table',
-      component: './Table',
     },
   ],
   proxy: {
