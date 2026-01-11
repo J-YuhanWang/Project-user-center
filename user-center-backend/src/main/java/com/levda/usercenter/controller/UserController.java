@@ -7,6 +7,8 @@ package com.levda.usercenter.controller;
  */
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.levda.usercenter.common.BaseResponse;
+import com.levda.usercenter.common.ResultUtils;
 import com.levda.usercenter.model.User;
 import com.levda.usercenter.model.request.UserLoginRequest;
 import com.levda.usercenter.model.request.UserRegisterRequest;
@@ -30,7 +32,7 @@ public class UserController {
     private UserService userService;
 
     @PostMapping("/register")
-    public Long userRegister(@RequestBody UserRegisterRequest userRegisterRequest){
+    public BaseResponse<Long> userRegister(@RequestBody UserRegisterRequest userRegisterRequest){
         if(userRegisterRequest == null){
             return null;
         }
@@ -43,11 +45,12 @@ public class UserController {
             return null;
         }
 
-        return userService.userRegister(userAccount,userPassword,checkPassword);
+        long result = userService.userRegister(userAccount,userPassword,checkPassword);
+        return new BaseResponse<>(0,result,"ok");
     }
 
     @PostMapping("/login")
-    public User userLogin(@RequestBody UserLoginRequest userLoginRequest, HttpServletRequest request){
+    public BaseResponse<User> userLogin(@RequestBody UserLoginRequest userLoginRequest, HttpServletRequest request){
         if(userLoginRequest == null){
             return null;
         }
@@ -56,18 +59,20 @@ public class UserController {
         if(StringUtils.isAnyBlank(userAccount,userPassword)){
             return null;
         }
-        return userService.userLogin(userAccount,userPassword,request);
+        User result = userService.userLogin(userAccount,userPassword,request);
+        return ResultUtils.success(result);
     }
     @PostMapping("/logout")
-    public Integer userLogout(HttpServletRequest request){
+    public BaseResponse<Integer> userLogout(HttpServletRequest request){
         if(request == null){
             return null;
         }
-        return userService.userLogout(request);
+        int result = userService.userLogout(request);
+        return ResultUtils.success(result);
     }
 
     @GetMapping("/current")
-    public User getCurrentUser(HttpServletRequest request){
+    public BaseResponse<User> getCurrentUser(HttpServletRequest request){
         Object userObj = request.getSession().getAttribute(USER_LOGIN_STATE);
         User currentUser =(User) userObj;
         if(currentUser==null){
@@ -79,38 +84,37 @@ public class UserController {
         User user = userService.getById(userId);
         //TODO:判断用户是否合法：是否被封号、删除等，做出相应处理
         //用户脱敏
-        return userService.getSafetyUser(user);
+        User safetyUser = userService.getSafetyUser(user);
+        return ResultUtils.success(safetyUser);
     }
 
     @GetMapping("/search")
-    public List<User> searchUser(String username,HttpServletRequest request){
+    public BaseResponse<List<User>> searchUser(String username,HttpServletRequest request){
         // Authentication: Only the administrator could query
         if(!isAdmin(request)){
-            return new ArrayList<>();
+//            return new ArrayList<>();
+            return null;
         }
         QueryWrapper<User> queryWrapper = new QueryWrapper<>();
         if(StringUtils.isNotBlank(username)){
             queryWrapper.like("username",username);
         }
         List<User> userList = userService.list(queryWrapper);
-//        return userList.stream().map(user->{
-//            user.setUserPassword(null);
-//            return userService.getSafetyUser(user);
-//        }).collect(Collectors.toList());
-        return userList.stream().map(user->userService.getSafetyUser(user)).collect(Collectors.toList());
+        List<User> list = userList.stream().map(user->userService.getSafetyUser(user)).collect(Collectors.toList());
+        return ResultUtils.success(list);
     }
 
     @PostMapping("/delete")
-    public boolean deleteUser(@RequestBody long id,HttpServletRequest request){
+    public BaseResponse<Boolean> deleteUser(@RequestBody long id,HttpServletRequest request){
         // Authentication: Only the administrator could query
         if(!isAdmin(request)){
-            return false;
+            return null;
         }
-
         if(id <= 0){
-            return false;
+            return null;
         }
-        return userService.removeById(id);
+        boolean isDelete = userService.removeById(id);
+        return ResultUtils.success(isDelete);
     }
 
     /**
