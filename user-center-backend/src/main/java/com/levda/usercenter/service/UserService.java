@@ -37,4 +37,12 @@ public interface UserService extends IService<User> {
      * @return safety user after desensitization
      */
     User getSafetyUser(User originUser);
+
+    /**
+     * User Logout
+     *
+     * @param request
+     * @return a number implies that logout successfully
+     */
+    int userLogout(HttpServletRequest request);
 }

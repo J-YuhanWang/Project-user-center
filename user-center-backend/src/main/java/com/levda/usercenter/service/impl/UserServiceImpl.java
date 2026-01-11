@@ -167,4 +167,16 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         safetyUser.setCreateTime(originUser.getCreateTime());
         return safetyUser;
     }
+
+    /**
+     * User logout
+     * @param request
+     */
+    @Override
+    public int userLogout(HttpServletRequest request){
+        //Remove user login status
+        request.getSession().removeAttribute(USER_LOGIN_STATE);
+        return 1;
+    }
+
 }
