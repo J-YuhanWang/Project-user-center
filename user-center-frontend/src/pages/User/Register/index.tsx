@@ -16,7 +16,7 @@ const Register: React.FC = () => {
 
   // 表单提交-注册
   const handleSubmit = async (values: API.RegisterParams) => {
-    const { userAccount, userPassword, checkPassword } = values;
+    const { userPassword, checkPassword } = values;
     if (userPassword !== checkPassword) {
       message.error('Passwords do not match');
       return;
@@ -24,19 +24,20 @@ const Register: React.FC = () => {
 
     try {
       // 注册
-      const id = await register({userAccount, userPassword, checkPassword});
+      const res = await register(values);
+      // const id = await register({userAccount, userPassword, checkPassword});
 
-      if (id > 0) {
+      if (res.code === 0 && res.data > 0) {
         const defaultLoginSuccessMessage = '注册成功！';
         message.success(defaultLoginSuccessMessage);
 
         const urlParams = new URL(window.location.href).searchParams;
         const redirect = urlParams.get('redirect');
-        history.push(redirect ? `/user/login?redirect=${redirect}`: '/user/login');
+        history.push(redirect ? `/user/login?redirect=${redirect}` : '/user/login');
         return;
       }
 
-      throw new Error(`Register failed: id= ${id}`);
+      // throw new Error(res.description);
 
     } catch (error) {
       const defaultLoginFailureMessage = '注册失败，请重试！';
