@@ -23,8 +23,8 @@ const columns: ProColumns<API.CurrentUser>[] = [
   },
   {
     title: 'Avatar',
-    render:(_,record)=>{
-      return(
+    render: (_, record) => {
+      return (
         <div>
           <Image src={record.avatarUrl} height={100} />
         </div>
@@ -58,7 +58,7 @@ const columns: ProColumns<API.CurrentUser>[] = [
     valueEnum: {
       0: {
         text: 'Default User',
-        status:'Default',
+        status: 'Default',
       },
       1: {
         text: 'Administrator',
@@ -73,7 +73,7 @@ const columns: ProColumns<API.CurrentUser>[] = [
   },
 
   // {
-  //   title: '操作',
+  //   title: 'Option',
   //   valueType: 'option',
   //   key: 'option',
   //   render: (text, record, _, action) => [
@@ -83,17 +83,17 @@ const columns: ProColumns<API.CurrentUser>[] = [
   //         action?.startEditable?.(record.id);
   //       }}
   //     >
-  //       编辑
+  //       Edit
   //     </a>,
   //     <a href={record.url} target="_blank" rel="noopener noreferrer" key="view">
-  //       查看
+  //       View
   //     </a>,
   //     <TableDropdown
   //       key="actionGroup"
   //       onSelect={() => action?.reload()}
   //       menus={[
-  //         { key: 'copy', name: '复制' },
-  //         { key: 'delete', name: '删除' },
+  //         { key: 'copy', name: 'Copy' },
+  //         { key: 'delete', name: 'Delete' },
   //       ]}
   //     />,
   //   ],
@@ -111,9 +111,9 @@ export default () => {
         console.log(sort, filter);
         const userList = await searchUsers();
         return {
-          data:userList,
+          data: userList.data,
+          success: userList.code === 0,
         }
-
       }}
       editable={{
         type: 'multiple',
@@ -138,7 +138,7 @@ export default () => {
         },
       }}
       form={{
-        // 由于配置了 transform，提交的参数与定义的不同这里需要转化一下
+        // Since transform is configured, parameters need conversion here if different from definition
         syncToUrl: (values, type) => {
           if (type === 'get') {
             return {
@@ -154,7 +154,7 @@ export default () => {
         onChange: (page) => console.log(page),
       }}
       dateFormatter="string"
-      headerTitle="高级表格"
+      headerTitle="Advanced Table"
       toolBarRender={() => [
         <Button
           key="button"
@@ -164,7 +164,7 @@ export default () => {
           }}
           type="primary"
         >
-          新建
+          Create
         </Button>,
       ]}
     />

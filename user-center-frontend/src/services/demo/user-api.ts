@@ -1,7 +1,7 @@
 import { request } from '@umijs/max';
 
 
-/** 登录接口 POST /api/user/login */
+/** Login Interface POST /api/user/login */
 export async function login(body: API.LoginParams, options?: { [key: string]: any }) {
   return request<API.BaseResponse<API.LoginResult>>('/api/user/login', {
     method: 'POST',
@@ -13,7 +13,7 @@ export async function login(body: API.LoginParams, options?: { [key: string]: an
   });
 }
 
-/** 注册接口 POST/api/user/register */
+/** Register Interface POST /api/user/register */
 export async function register(body: API.RegisterParams, options?: { [key: string]: any }) {
   return request<API.BaseResponse<API.RegisterResult>>('/api/user/register', {
     method: 'POST',
@@ -25,9 +25,9 @@ export async function register(body: API.RegisterParams, options?: { [key: strin
   });
 }
 
-/** 获取当前用户 GET /api/user/current */
+/** Get Current User GET /api/user/current */
 export async function currentUser(options?: { [key: string]: any }) {
-  return request<API.BaseResponse<API.CurrentUser>>('/api/user/current', { //此时返回的是user
+  return request<API.BaseResponse<API.CurrentUser>>('/api/user/current', { // Should return user object
     method: 'GET',
     params: {
       timestamp: new Date().getTime(),
@@ -36,16 +36,16 @@ export async function currentUser(options?: { [key: string]: any }) {
   });
 }
 
-/** 搜索当前用户 GET /api/user/search */
+/** Search Users GET /api/user/search */
 export async function searchUsers(options?: { [key: string]: any }) {
-  return request<API.BaseResponse<API.CurrentUser[]>>('/api/user/search', { //此时返回的是user
+  return request<API.BaseResponse<API.CurrentUser[]>>('/api/user/search', {
     method: 'GET',
     ...(options || {}),
   });
 }
 
 
-/** 退出当前用户 POST /api/user/logout */
+/** Logout User POST /api/user/logout */
 export async function outLogin(options?: { [key: string]: any }) {
   return request<API.BaseResponse<Record<string, any>>>('/api/user/logout', {
     method: 'POST',

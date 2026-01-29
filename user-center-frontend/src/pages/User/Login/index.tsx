@@ -10,19 +10,19 @@ const Login: React.FC = () => {
   const [type, setType] = useState<string>('account');
   const { setInitialState } = useModel('@@initialState');
 
-  // 表单提交处理函数
+  // Form submission handler
   const handleSubmit = async (values: API.LoginParams) => {
     try {
-      // 1.登录
+      // 1. Login
       const res = await login({ ...values, type });
 
       if (res.code === 0 && res.data) {
-        const defaultLoginSuccessMessage = '登录成功！';
+        const defaultLoginSuccessMessage = 'Login successful!';
         message.success(defaultLoginSuccessMessage);
 
-        // 2. 获取真正的用户信息
-        // 🌟 核心步骤 2: 亲自去查户口 (不依赖 app.tsx)
-        // 手动更新，防止竞态
+        // 2. Get real user info
+        // 🌟 Core Step 2: Fetch user details personally (don't rely on app.tsx)
+        // Update manually to prevent race conditions
         try {
           const userRes = await queryCurrentUser();
           if (userRes.code === 0 && userRes.data) {
@@ -30,26 +30,26 @@ const Login: React.FC = () => {
               ...s,
               currentUser: userRes.data,
             }));
-            // 3. 只有成功获取用户信息后才跳转
+            // 3. Jump only after successfully procuring user info
             const urlParams = new URL(window.location.href).searchParams;
             const redirect = urlParams.get('redirect');
-            // 使用 window.location.href 强制刷新，确保 Cookie 和状态完全同步
+            // Force refresh with window.location.href to ensure Cookie and state sync
             window.location.href = redirect || '/';
             return;
           } else {
-            message.error('获取用户信息失败');
+            message.error('Failed to fetch user info');
           }
         } catch (e) {
           console.error(e);
-          message.error('获取用户信息异常');
+          message.error('Exception fetching user info');
         }
-        // 如果获取用户信息失败，不跳转，留在登录页让用户重试
+        // If fetching user info fails, do not redirect, stay on login page for retry
         return;
       }
-      // 如果 code !== 0
-      message.error(res.message || '登录失败，请检查账号和密码');
+      // If code !== 0
+      message.error(res.message || 'Login failed, please check account and password');
     } catch (error) {
-      const defaultLoginFailureMessage = '登录失败，请重试！';
+      const defaultLoginFailureMessage = 'Login failed, please try again!';
       message.error(defaultLoginFailureMessage);
     }
   };
@@ -88,7 +88,7 @@ const Login: React.FC = () => {
           {type === 'account' && (
             <>
               <ProFormText
-                name="userAccount" // 对应后端 UserLoginRequest 里的 userAccount
+                name="userAccount" // Maps to backend UserLoginRequest: userAccount
                 fieldProps={{
                   size: 'large',
                   prefix: <UserOutlined className={'prefixIcon'} />,
@@ -102,7 +102,7 @@ const Login: React.FC = () => {
                 ]}
               />
               <ProFormText.Password
-                name="userPassword" // 对应后端 UserLoginRequest 里的 userPassword
+                name="userPassword" // Maps to backend UserLoginRequest: userPassword
                 fieldProps={{
                   size: 'large',
                   prefix: <LockOutlined className={'prefixIcon'} />,

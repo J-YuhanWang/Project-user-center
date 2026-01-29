@@ -1,30 +1,30 @@
-// 运行时配置
+// Runtime Configuration
 
-// 全局初始化数据配置，用于 Layout 用户信息和权限初始化
+// Global initial state configuration, used for Layout user information and permission initialization
 import { RequestConfig } from '@@/plugin-request/request';
 import { currentUser as queryCurrentUser, outLogin } from '@/services/demo/user-api';
 import { history, RunTimeLayoutConfig } from '@umijs/max';
 import { Avatar, Dropdown, message } from 'antd';
 import { LogoutOutlined, UserOutlined } from '@ant-design/icons';
 import { defaultSettings } from '@ant-design/pro-layout/es/defaultSettings';
-// 如果你有退出接口
+// If you have a logout interface
 // import { outLogin } from '@/services/ant-design-pro/api';
 
 const loginPath = '/user/login';
 /*
-无需登录态的页面
+ Pages that do not require login state
  */
 const NO_NEED_LOGIN_WHITE_LIST = ['/user/register', loginPath];
 
-// 更多信息见文档：https://umijs.org/docs/api/runtime-config#getinitialstate
-// 1. 全局初始化状态
+// See documentation for more info: https://umijs.org/docs/api/runtime-config#getinitialstate
+// 1. Global initial state
 export async function getInitialState(): Promise<{
   settings?: any;
   currentUser?: API.CurrentUser;
   loading?: boolean;
   fetchUserInfo?: () => Promise<API.CurrentUser | undefined>;
 }> {
-  // 定义一个获取用户信息的函数（Login 页面登录成功后会调用它）
+  // Define a function to fetch user info (Called after successful login on Login page)
   const fetchUserInfo = async () => {
     try {
       const response = await queryCurrentUser();
@@ -38,11 +38,11 @@ export async function getInitialState(): Promise<{
     return undefined;
   };
 
-  // 如果是登录页面，就不查用户信息了，只把方法暴露出去
-  // 如果不是登录页面，就尝试去获取用户信息
+  // If on login page, skip fetching user info, only expose method
+  // If not on login page, attempt to fetch user info
   const currentUser = await fetchUserInfo();
   return {
-    fetchUserInfo, // 把这个方法暴露给全局，这样 Login 页面就能用了
+    fetchUserInfo, // Expose this method globally for use in Login page
     currentUser,
     settings: defaultSettings,
   };
@@ -50,7 +50,7 @@ export async function getInitialState(): Promise<{
 
 export const layout: RunTimeLayoutConfig = ({ initialState, setInitialState }): any => {
 
-  console.log('当前全局状态：', initialState?.currentUser);
+  console.log('Current global state:', initialState?.currentUser);
   return {
     logo: 'https://img.alicdn.com/tfs/TB1YHEpwUT1gK0jSZFhXXaAtVXa-28-27.svg',
     menu: {
@@ -58,34 +58,34 @@ export const layout: RunTimeLayoutConfig = ({ initialState, setInitialState }): 
     },
     layout: 'mix',
 
-    // avatarProps: undefined, // 禁用默认的，因为我们要完全自定义
+    // avatarProps: undefined, // Disable default, as we customize it completely
     // rightContentRender: () => <AvatarDropdown menu={true} />,
-    //右上角头像和用户名
+    // Top right avatar and username
     rightContentRender: () => {
 
       const currentUser = initialState?.currentUser;
 
-      // 1. 如果没登录，或者 user 是空的，啥都不显示
+      // 1. If not logged in, or user is empty, display nothing
       if (!currentUser) {
         return null;
       }
 
-      // 2. 定义点击头像弹出的菜单项（这里主要是退出登录）
+      // 2. Define menu items for avatar dropdown (mainly logout)
       const items = [
         {
           key: 'logout',
           icon: <LogoutOutlined />,
           label: 'Logout',
           onClick: async () => {
-            // A. 调用后端退出接口 (可选，如果有的话)
+            // A. Call backend logout interface (Optional, if exists)
             await outLogin();
 
-            // B. 清空全局状态（关键！）
+            // B. Clear global state (Critical!)
             await setInitialState((s) => ({ ...s, currentUser: undefined }));
 
-            // C. 跳转回登录页
+            // C. Redirect to login page
             history.push('/user/login');
-            message.success('已安全退出');
+            message.success('Logged out successfully');
           },
         },
       ];
@@ -95,36 +95,36 @@ export const layout: RunTimeLayoutConfig = ({ initialState, setInitialState }): 
         <div style={{ display: 'flex', alignItems: 'center', marginRight: 20 }}>
           <Dropdown menu={{ items }} placement="bottomRight">
             <div style={{ cursor: 'pointer', display: 'flex', alignItems: 'center' }}>
-              {/* 头像组件 */}
+              {/* Avatar Component */}
               <Avatar
                 size="small"
                 src={currentUser.avatarUrl}
-                icon={<UserOutlined />} // 如果没图片，显示这个默认图标
+                icon={<UserOutlined />} // Show default icon if no image
                 alt="avatar"
               />
 
-              {/* 用户名组件 */}
+              {/* Username Component */}
               <span style={{ marginLeft: 8, fontWeight: 500 }}>
-                {currentUser.username || currentUser.userAccount || '用户'}
+                {currentUser.username || currentUser.userAccount || 'User'}
               </span>
             </div>
           </Dropdown>
         </div>
       );
     },
-    // 水印内容：显示当前登录用户的名字
+    // Watermark: Display current logged-in user's name
     waterMarkProps: {
       content: initialState?.currentUser?.userAccount,
     },
 
     //   Interception logic during page switching
     onPageChange: () => {
-      console.log('门卫检查:', initialState?.currentUser)
+      console.log('Gatekeeper check:', initialState?.currentUser)
       const { location } = history;
       if (NO_NEED_LOGIN_WHITE_LIST.includes(location.pathname)) {
         return;
       }
-      //如果没有登陆，重定向到login page
+      // If not logged in, redirect to login page
       if (!initialState?.currentUser) {
         history.push(loginPath);
       }
@@ -136,35 +136,35 @@ export const layout: RunTimeLayoutConfig = ({ initialState, setInitialState }): 
 export const request: RequestConfig = {
   // baseURL:'/api',
   timeout: 1000000,
-  withCredentials: true, // 允许跨域携带 Cookie
+  withCredentials: true, // Allow cross-domain cookies
 
-  // 响应拦截器 (保留之前建议的逻辑，这块很有用)
+  // Response interceptor
   responseInterceptors: [
     (response) => {
       const { data } = response as unknown as { data: any };
       if (!data) {
-        throw new Error('网络异常');
+        throw new Error('Network Exception');
       }
-      // 业务状态码
+      // Business status code
       const { code } = data;
-      // 成功
+      // Success
       if (code === 0) {
-        // 不再解包，直接返回完整响应
+        // Do not unwrap, return complete response directly
         return response;
       }
-      // 未登录
+      // Not logged in
       if (code === 40100) {
-        // message.error('请先登录');
+        // message.error('Please log in first');
         if (!history.location.pathname.includes('/user/login')) {
           history.push(loginPath);
         }
-        // 抛出错误，中断后续流程
-        throw new Error('请先登录');
+        // Throw error to interrupt
+        throw new Error('Please log in first');
       }
 
-      // 其他错误
-      message.error(data.message || '系统错误');
-      throw new Error(data.message || '系统错误');
+      // Other errors
+      message.error(data.message || 'System Error');
+      throw new Error(data.message || 'System Error');
     },
   ],
 

@@ -1,8 +1,8 @@
 package com.levda.usercenter;/*
- * @author BlairWang
- * @Date 30/12/2025 3:25 pm
- * @Version 1.0
- */
+                             * @author BlairWang
+                             * @Date 30/12/2025 3:25 pm
+                             * @Version 1.0
+                             */
 
 import com.levda.usercenter.mapper.UserMapper;
 import com.levda.usercenter.model.User;
@@ -11,14 +11,13 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
-
 import java.util.List;
 
 @SpringBootTest
 public class SampleTest {
 
-//    @Autowired 按照类型注入
-//    @Resource 按照Java bean的名称去注入
+    // @Autowired: Inject by type
+    // @Resource: Inject by Java bean name
     @Resource
     private UserMapper userMapper;
 
@@ -26,9 +25,9 @@ public class SampleTest {
      * Testing database connectivity
      */
     @Test
-    public void testSelect(){
+    public void testSelect() {
         System.out.println("----selectAll method test");
-//        queryWrapper是查询条件，为null代表查询所有
+        // queryWrapper is the query condition, null represents querying all
         List<User> userList = userMapper.selectList(null);
         Assertions.assertEquals(2, userList.size());
         userList.forEach(System.out::println);

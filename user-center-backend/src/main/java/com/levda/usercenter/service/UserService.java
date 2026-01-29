@@ -1,9 +1,9 @@
-package com.levda.usercenter.service;/*
+package com.levda.usercenter.service;
+/**
  * @author BlairWang
  * @Date 30/12/2025 9:06 pm
  * @Version 1.0
  */
-
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.levda.usercenter.model.User;
 import jakarta.servlet.http.HttpServletRequest;
@@ -26,7 +26,7 @@ public interface UserService extends IService<User> {
      * @param userAccount  user account
      * @param userPassword user password
      * @param request
-     * @return De-identified user information脱敏后的用户信息
+     * @return De-identified user information
      */
     User userLogin(String userAccount, String userPassword, HttpServletRequest request);
 

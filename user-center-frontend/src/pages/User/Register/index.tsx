@@ -7,14 +7,14 @@ import { SYSTEM_LOGO } from '@/constants';
 import { register } from '@/services/demo/user-api';
 
 
-// 注意：这里以后要换成你真正的后端接口方法
+// Note: Replace with your actual backend interface in the future
 // import { register } from '@/services/ant-design-pro/api';
 
 const Register: React.FC = () => {
   const [type, setType] = useState<string>('account');
 
 
-  // 表单提交-注册
+  // Form Submission - Register
   const handleSubmit = async (values: API.RegisterParams) => {
     const { userPassword, checkPassword } = values;
     if (userPassword !== checkPassword) {
@@ -23,12 +23,11 @@ const Register: React.FC = () => {
     }
 
     try {
-      // 注册
+      // Register
       const res = await register(values);
-      // const id = await register({userAccount, userPassword, checkPassword});
 
       if (res.code === 0 && res.data > 0) {
-        const defaultLoginSuccessMessage = '注册成功！';
+        const defaultLoginSuccessMessage = 'Registration successful!';
         message.success(defaultLoginSuccessMessage);
 
         const urlParams = new URL(window.location.href).searchParams;
@@ -40,14 +39,24 @@ const Register: React.FC = () => {
       // throw new Error(res.description);
 
     } catch (error) {
-      const defaultLoginFailureMessage = '注册失败，请重试！';
+      const defaultLoginFailureMessage = 'Registration failed, please try again!';
       message.error(defaultLoginFailureMessage);
     }
   };
 
+  const pageStyle = {
+    backgroundColor: 'white',
+    height: '100vh',
+  };
+
+  const formContainerStyle = {
+    margin: '100px auto',
+    width: '400px',
+  };
+
   return (
-    <div style={{ backgroundColor: 'white', height: '100vh' }}>
-      <div style={{ margin: '100px auto', width: '400px' }}>
+    <div style={pageStyle}>
+      <div style={formContainerStyle}>
         <LoginForm
           logo={<img alt="logo" src={SYSTEM_LOGO} />}
           title="User Center"
@@ -79,7 +88,7 @@ const Register: React.FC = () => {
           {type === 'account' && (
             <>
               <ProFormText
-                name="userAccount" // 对应后端 UserLoginRequest 里的 userAccount
+                name="userAccount" // Maps to backend UserLoginRequest: userAccount
                 fieldProps={{
                   size: 'large',
                   prefix: <UserOutlined className={'prefixIcon'} />,
@@ -93,7 +102,7 @@ const Register: React.FC = () => {
                 ]}
               />
               <ProFormText.Password
-                name="userPassword" // 对应后端 UserLoginRequest 里的 userPassword
+                name="userPassword" // Maps to backend UserLoginRequest: userPassword
                 fieldProps={{
                   size: 'large',
                   prefix: <LockOutlined className={'prefixIcon'} />,
@@ -112,7 +121,7 @@ const Register: React.FC = () => {
                 ]}
               />
               <ProFormText.Password
-                name="checkPassword" // 对应后端 UserLoginRequest 里的 checkPassword
+                name="checkPassword" // Maps to backend UserLoginRequest: checkPassword
                 fieldProps={{
                   size: 'large',
                   prefix: <LockOutlined className={'prefixIcon'} />,

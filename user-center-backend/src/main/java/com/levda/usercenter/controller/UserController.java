@@ -34,92 +34,97 @@ public class UserController {
     private UserService userService;
 
     @PostMapping("/register")
-    public BaseResponse<Long> userRegister(@RequestBody UserRegisterRequest userRegisterRequest){
-        if(userRegisterRequest == null){
-            //异常的用BusinessException异常 封装，最后都会被GlobalExceptionHandler接住进入相应处理流程
-            throw new BusinessException(ErrorCode.PARAMS_ERROR,"请求参数不能为空");
+    public BaseResponse<Long> userRegister(@RequestBody UserRegisterRequest userRegisterRequest) {
+        if (userRegisterRequest == null) {
+            // BusinessException wraps exceptions, eventually handled by
+            // GlobalExceptionHandler
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "Request parameters cannot be null");
         }
 
         String userAccount = userRegisterRequest.getUserAccount();
         String userPassword = userRegisterRequest.getUserPassword();
         String checkPassword = userRegisterRequest.getCheckPassword();
-        //Check if those three attributes exist--prune
-        if(StringUtils.isAnyBlank(userAccount,userPassword,checkPassword)){
-            throw new BusinessException(ErrorCode.PARAMS_ERROR,"请求参数缺失(账号、密码、确认密码)");
+        // Check if those three attributes exist--prune
+        if (StringUtils.isAnyBlank(userAccount, userPassword, checkPassword)) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR,
+                    "Request parameters missing (Account, Password, Check Password)");
         }
 
-        long result = userService.userRegister(userAccount,userPassword,checkPassword);
-        //成功的用ResultUtils.success封装
+        long result = userService.userRegister(userAccount, userPassword, checkPassword);
+        // Success wrapped with ResultUtils.success
         return ResultUtils.success(result);
     }
 
     @PostMapping("/login")
-    public BaseResponse<User> userLogin(@RequestBody UserLoginRequest userLoginRequest, HttpServletRequest request){
-        if(userLoginRequest == null){
-            throw new BusinessException(ErrorCode.PARAMS_ERROR,"请求参数不能为空");
+    public BaseResponse<User> userLogin(@RequestBody UserLoginRequest userLoginRequest, HttpServletRequest request) {
+        if (userLoginRequest == null) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "Request parameters cannot be null");
         }
         String userAccount = userLoginRequest.getUserAccount();
         String userPassword = userLoginRequest.getUserPassword();
-        if(StringUtils.isAnyBlank(userAccount,userPassword)){
-            throw new BusinessException(ErrorCode.PARAMS_ERROR,"账号或密码不能为空");
+        if (StringUtils.isAnyBlank(userAccount, userPassword)) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "Account or password cannot be empty");
         }
-        User result = userService.userLogin(userAccount,userPassword,request);
+        User result = userService.userLogin(userAccount, userPassword, request);
         return ResultUtils.success(result);
     }
+
     @PostMapping("/logout")
-    public BaseResponse<Integer> userLogout(HttpServletRequest request){
-        if(request == null){
-            throw new BusinessException(ErrorCode.PARAMS_ERROR,"请求参数不能为空");
+    public BaseResponse<Integer> userLogout(HttpServletRequest request) {
+        if (request == null) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "Request parameters cannot be null");
         }
         int result = userService.userLogout(request);
         return ResultUtils.success(result);
     }
 
     @GetMapping("/current")
-    public BaseResponse<User> getCurrentUser(HttpServletRequest request){
+    public BaseResponse<User> getCurrentUser(HttpServletRequest request) {
         Object userObj = request.getSession().getAttribute(USER_LOGIN_STATE);
-        User currentUser =(User) userObj;
-        if(currentUser==null){
-            throw new BusinessException(ErrorCode.NOT_LOGIN,"用户未登录或登录已过期");
+        User currentUser = (User) userObj;
+        if (currentUser == null) {
+            throw new BusinessException(ErrorCode.NOT_LOGIN, "User not logged in or session expired");
         }
-        //找到当前的currentUser的id
+        // Find current user id
         long userId = currentUser.getId();
-        //通过id获取user
+        // Get user by id
         User user = userService.getById(userId);
 
-        //此时判空防止session记录了ID，但是数据库中账户信息已被删除
-        if(user == null){
-            throw new BusinessException(ErrorCode.NOT_LOGIN,"该账户不存在");
+        // Check if user is null to prevent session persisting ID but DB record deleted
+        if (user == null) {
+            throw new BusinessException(ErrorCode.NOT_LOGIN, "Account does not exist");
         }
-        //用户脱敏
+        // User de-identification (desensitization)
         User safetyUser = userService.getSafetyUser(user);
         return ResultUtils.success(safetyUser);
     }
 
     @GetMapping("/search")
-    public BaseResponse<List<User>> searchUser(String username,HttpServletRequest request){
+    public BaseResponse<List<User>> searchUser(String username, HttpServletRequest request) {
         // Authentication: Only the administrator could query
-        if(!isAdmin(request)){
-//            return new ArrayList<>();
-            throw new BusinessException(ErrorCode.NO_AUTH,"该账户没有管理员权限");
+        if (!isAdmin(request)) {
+            // return new ArrayList<>();
+            throw new BusinessException(ErrorCode.NO_AUTH, "Account has no administrator privileges");
         }
         QueryWrapper<User> queryWrapper = new QueryWrapper<>();
-        if(StringUtils.isNotBlank(username)){
-            queryWrapper.like("username",username);
+        if (StringUtils.isNotBlank(username)) {
+            queryWrapper.like("username", username);
         }
         List<User> userList = userService.list(queryWrapper);
-        List<User> list = userList.stream().map(user->userService.getSafetyUser(user)).collect(Collectors.toList());
+        List<User> list = userList.stream().map(user -> userService.getSafetyUser(user)).collect(Collectors.toList());
         return ResultUtils.success(list);
     }
 
+
+    // object format
     @PostMapping("/delete")
-    public BaseResponse<Boolean> deleteUser(@RequestBody long id,HttpServletRequest request){
+    public BaseResponse<Boolean> deleteUser(@RequestBody long id, HttpServletRequest request) {
         // Authentication: Only the administrator could query
-        if(!isAdmin(request)){
-            throw new BusinessException(ErrorCode.NO_AUTH,"该账户没有管理员权限");
+        if (!isAdmin(request)) {
+            throw new BusinessException(ErrorCode.NO_AUTH, "Account has no administrator privileges");
         }
-        if(id <= 0){
-            throw new BusinessException(ErrorCode.PARAMS_ERROR,"ID必须为正整数");
+        if (id <= 0) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "ID must be a positive integer");
         }
         boolean isDelete = userService.removeById(id);
         return ResultUtils.success(isDelete);
@@ -127,18 +132,18 @@ public class UserController {
 
     /**
      * Whether the user is an administrator.
+     * 
      * @param request
      * @return
      */
-    public boolean isAdmin(HttpServletRequest request){
+    public boolean isAdmin(HttpServletRequest request) {
 
         Object userObj = request.getSession().getAttribute(USER_LOGIN_STATE);
-        User user = (User)userObj;
-        if(user == null || user.getUserRole()!=1){
+        User user = (User) userObj;
+        if (user == null || user.getUserRole() != 1) {
             return false;
         }
         return true;
     }
-
 
 }
