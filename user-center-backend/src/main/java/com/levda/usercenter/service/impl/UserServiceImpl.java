@@ -1,13 +1,9 @@
 package com.levda.usercenter.service.impl;
-/**
- * user service implement class
- * @author BlairWang
- * @Date 30/12/2025 9:07 pm
- * @Version 1.0
- */
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.levda.usercenter.common.ErrorCode;
+import com.levda.usercenter.exception.BusinessException;
 import com.levda.usercenter.mapper.UserMapper;
 import com.levda.usercenter.model.User;
 import com.levda.usercenter.service.UserService;
@@ -23,10 +19,17 @@ import java.util.regex.Pattern;
 
 import static com.levda.usercenter.constant.UserConstant.USER_LOGIN_STATE;
 
+/**
+ * user service implement class
+ *
+ * @author BlairWang
+ * @Date 30/12/2025 9:07 pm
+ * @Version 1.0
+ */
+
 @Service
-@Slf4j //Lombok注解，打上之后用于输出日志
-public class UserServiceImpl extends ServiceImpl<UserMapper, User>
-        implements UserService {
+@Slf4j // Lombok annotation for logging
+public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements UserService {
     @Resource
     private UserMapper userMapper;
 
@@ -35,108 +38,107 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
      */
     private static final String SALT = "blair_user_center!@#";
 
+    /**
+     * Account pattern
+     */
+    private static final Pattern VALID_ACCOUNT_PATTERN = Pattern.compile("^[a-zA-Z0-9_]+$");
+
     @Override
     public long userRegister(String userAccount, String userPassword, String checkPassword) {
         //No.1 Register
         //1. User verification
-//        if(userAccount == null || userPassword==null || checkPassword == null || userAccount.length()>0){}
+        //if(userAccount == null || userPassword==null || checkPassword == null || userAccount.length()>0){}
         if(StringUtils.isAnyBlank(userAccount,userPassword,checkPassword)){
-            //TODO: Change to a custom exception
-            return -1;
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "Parameters cannot be empty");
         }
         //2. userAccount length must be at least 4 characters.
         if(userAccount.length() < 4){
-            return -1;
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "User account must be at least 4 characters");
         }
         //3.user password length must be at least 8 characters.
         if(userPassword.length() < 8 || checkPassword.length()<8){
-            return -1;
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "User password must be at least 8 characters");
         }
 
-
-        //5.账户不能包含特殊字符
-        // 5.1. 定义正则表达式（建议定义为常量）
-        String validPattern = "^[a-zA-Z0-9_]+$";
-        // 5.2. 使用 Pattern 和 Matcher 进行匹配
-        Matcher matcher = Pattern.compile(validPattern).matcher(userAccount);
-        // 5.3. 如果不匹配（包含特殊字符），直接返回错误码或抛出异常
+        // 5. Account cannot contain special characters
+        // 5.2. Match using Pattern and Matcher
+        Matcher matcher = VALID_ACCOUNT_PATTERN.matcher(userAccount);
+        // 5.3. If not matched (contains special characters), return error code
         if(!matcher.find()){
-            return -1;
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "Account contains invalid characters");
         }
 
-        //6.密码和校验密码相同
+        //6. Password and check password must match
         if(!userPassword.equals(checkPassword)){
-            return -1;
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "Passwords do not match");
         }
 
-        //优化步骤1：将用户重复逻辑放到校验特殊字符之后，因为如果本身包含特殊字符，就直接报错提示，不必去数据库校验
-        // 4.用户名不能重复username could not be duplicated
+        // Optimization Step 1: Move duplicate user verification after special character
+        // check
+        // 4. Username cannot be duplicated
         QueryWrapper<User> queryWrapper = new QueryWrapper<>();
-        //第一个参数 "userAccount" 必须对应数据库里的表字段名
+        // First parameter "userAccount" must match the database column name
         queryWrapper.eq("userAccount",userAccount);
         long count = userMapper.selectCount(queryWrapper);
         if(count > 0){
-            return -1;
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "Account already exists");
         }
 
-        //No.2 加密功能 Password Salting & Hashing: md5不需要解密，是单向加密的非对称加密方式
-        String encryptPassword = DigestUtils.md5DigestAsHex((SALT+userPassword).getBytes());
+        // No.2 Encryption: Password Salting & Hashing: md5 is one-way encryption
+        String encryptPassword = DigestUtils.md5DigestAsHex((SALT + userPassword).getBytes());
 
-        //No.3 插入新数据
+        // No.3 Insert new data
         User user = new User();
         user.setUserAccount(userAccount);
         user.setUserPassword(encryptPassword);
         boolean saveResult = this.save(user);
-        if(!saveResult){
-            return -1;
+        if (!saveResult) {
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR, "Registration failed, database error");
         }
 
         return user.getId();
     }
 
-
     @Override
     public User userLogin(String userAccount, String userPassword, HttpServletRequest request) {
-        //No.1 Register
-        //1. User verification
-        if(StringUtils.isAnyBlank(userAccount,userPassword)){
-            return null;
+        // No.1 Register
+        // 1. User verification
+        if (StringUtils.isAnyBlank(userAccount, userPassword)) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "Parameters cannot be empty");
         }
-        //2. userAccount length must be at least 4 characters.
-        if(userAccount.length() < 4){
-            return null;
+        // 2. userAccount length must be at least 4 characters.
+        if (userAccount.length() < 4) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "User account must be at least 4 characters");
         }
-        //3.user password length must be at least 8 characters.
-        if(userPassword.length() < 8 ){
-            return null;
+        // 3.user password length must be at least 8 characters.
+        if (userPassword.length() < 8) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "User password must be at least 8 characters");
         }
 
-        //5.账户不能包含特殊字符
-        // 5.1. 定义正则表达式（建议定义为常量）
-        String validPattern = "^[a-zA-Z0-9_]+$";
-        // 5.2. 使用 Pattern 和 Matcher 进行匹配
-        Matcher matcher = Pattern.compile(validPattern).matcher(userAccount);
-        // 5.3. 如果不匹配（包含特殊字符），直接返回错误码或抛出异常
+        // 5. Account cannot contain special characters
+        // 5.2. Match using Pattern and Matcher
+        Matcher matcher = VALID_ACCOUNT_PATTERN.matcher(userAccount);
+        // 5.3. If not matched (contains special characters), return error code
         if(!matcher.find()){
-            return null;
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "Account contains invalid characters");
         }
 
-        //No.2 加密功能 Password Salting & Hashing: md5不需要解密，是单向加密的非对称加密方式
+        //No.2 Encryption: Password Salting & Hashing
         String encryptPassword = DigestUtils.md5DigestAsHex((SALT+userPassword).getBytes());
         QueryWrapper<User> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("userAccount",userAccount);
         queryWrapper.eq("userPassword",encryptPassword);
         User user = userMapper.selectOne(queryWrapper);
         if(user == null){
-            //用户不存在/用户密码输错了,但是处于
+            // User does not exist or password incorrect
             log.info("User login failed, userAccount cannot match userPassword");
-            return null;
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "User mismatch or password incorrect");
         }
 
-        //No.3 用户信息脱敏
+        //No.3 User desensitization
         User safetyUser= getSafetyUser(user);
 
-        //No.4 记录用户的登录态
+        //No.4 Record user login status
         request.getSession().setAttribute(USER_LOGIN_STATE,safetyUser);
 
         return safetyUser;
@@ -149,9 +151,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
      * @return safety user
      */
     @Override
-    public User getSafetyUser(User originUser){
-        //判空
-        if(originUser==null){
+    public User getSafetyUser(User originUser) {
+        // Check null
+        if (originUser == null) {
             return null;
         }
         User safetyUser = new User();
@@ -170,11 +172,12 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
 
     /**
      * User logout
+     *
      * @param request
      */
     @Override
-    public int userLogout(HttpServletRequest request){
-        //Remove user login status
+    public int userLogout(HttpServletRequest request) {
+        // Remove user login status
         request.getSession().removeAttribute(USER_LOGIN_STATE);
         return 1;
     }
