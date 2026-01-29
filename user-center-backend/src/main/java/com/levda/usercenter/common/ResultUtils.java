@@ -1,66 +1,70 @@
-package com.levda.usercenter.common;/*
+package com.levda.usercenter.common;
+
+/**
+ * Utility class for generating response objects.
+ * Implements the Simple Factory Pattern to decouple response creation.
+ *
  * @author BlairWang
- * @Date 11/01/2026 6:59 pm
- * @Version 1.0
+ * @since 11/01/2026
+ * @version 1.0
  */
 
 public class ResultUtils {
     /**
-     * success
+     * Success response with data
      *
-     * @param data
-     * @return
-     * @param <T>
+     * @param data response data
+     * @param <T>  type of data
+     * @return BaseResponse with success code (0)
      */
     public static <T> BaseResponse<T> success(T data){
         return new BaseResponse<>(0,data,"ok");
     }
 
     /**
-     * Error
+     * Failure response based on ErrorCode enum
      *
-     * @param errorCode
-     * @return
+     * @param errorCode specific error enum
+     * @return BaseResponse with error info
      */
     public static <T> BaseResponse<T> error(ErrorCode errorCode){
         return new BaseResponse<>(errorCode);
     }
 
     /**
-     * Error
+     * Failure response with custom code and message
      *
-     * @param code
-     * @param message
-     * @param description
-     * @return
-     * @param <T>
+     * @param code        custom error code
+     * @param message     error message
+     * @param description detailed error description
+     * @return BaseResponse
      */
     public static <T> BaseResponse<T> error(int code,String message,String description){
-        return new BaseResponse(code,null,message,description);
+        return new BaseResponse<>(code,null,message,description);
     }
 
     /**
-     * Error
+     * Failure response with ErrorCode but custom message/description
      *
-     * @param errorCode
-     * @param message
-     * @param description
-     * @return
-     * @param <T>
+     * @param errorCode   specific error enum
+     * @param message     custom message
+     * @param description detailed description
+     * @return BaseResponse
      */
     public static <T> BaseResponse<T> error(ErrorCode errorCode,String message,String description){
-        return new BaseResponse(errorCode.getCode(),null,message,description);
+        return new BaseResponse<>(errorCode.getCode(),null,message,description);
     }
 
     /**
-     * Error
-     * @param errorCode
-     * @param description
-     * @return
-     * @param <T>
+     * Failure response with ErrorCode and custom description
+     * (Uses the default message from ErrorCode)
+     *
+     * @param errorCode   specific error enum
+     * @param description detailed description
+     * @return BaseResponse
      */
     public static <T> BaseResponse<T> error(ErrorCode errorCode,String description){
-        return new BaseResponse(errorCode.getCode(),null,errorCode.getMessage(),description);
+        return new BaseResponse<>(errorCode.getCode(),null,errorCode.getMessage(),description);
     }
 
 
