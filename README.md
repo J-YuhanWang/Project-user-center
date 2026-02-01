@@ -79,11 +79,5 @@ Through this project, I learned:
 - How to use Docker Compose to manage database and application services together.
 - How to configure a domain name and SSL certificate.
 
-------
 
-## 📬 Contact
-
-- **Developer**: Yuhan Wang
-- **Email**: yuhan.wang4@ucdconnect.ie
-- **LinkedIn**: [Yuhan Wang LinkedIn Page](https://www.linkedin.com/in/yuhan-wang-324186382/)
 
