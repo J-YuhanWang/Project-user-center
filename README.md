@@ -79,5 +79,23 @@ Through this project, I learned:
 - How to use Docker Compose to manage database and application services together.
 - How to configure a domain name and SSL certificate.
 
+------
+
+## 🚀 Future Improvements
+
+While the current release focuses on establishing a solid manual deployment pipeline on Linux, I have identified several key areas for future optimization to align with DevOps best practices:
+
+* [ ] **Testing Strategy**:
+  * **Goal**: Increase code reliability by implementing Unit Tests (JUnit 5) for backend logic and Integration Tests for API endpoints.
+* [ ] **Performance & Caching**:
+  * **Goal**: Introduce **Redis** to manage user sessions and cache frequent database queries to reduce latency.
+* [ ] **User Experience**:
+  * **Goal**: Enhance the frontend with a responsive "User Profile" dashboard and "Forgot Password" functionality via email SMTP integration.
+
+- [ ] **Automated CI/CD Pipeline**:
+
+  * Currently, the project uses a manual Docker build process to understand the low-level deployment mechanics.
+
+  * **Goal**: Integrate **Jenkins** to automate testing and deployment workflows.
 
 
